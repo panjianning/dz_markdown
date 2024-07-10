@@ -156,7 +156,7 @@ window.initeditor = function (postid, editor, opts) {
     }, 10000);
     document.querySelector('#switch-editor').onclick = function () {
         if (editor === 'md') {
-            this.innerHTML = '使用狂炫酷爆吊炸天的markdown编辑器';
+            this.innerHTML = '使用Markdown编辑器';
             editor = 'dz';
             mdDiv.style.display = 'none';
             dzDiv.style.display = 'block';
