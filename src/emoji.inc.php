@@ -8,7 +8,7 @@ if (!defined('IN_DISCUZ')) {
     exit('Access Denied');
 }
 
-require_once DISCUZ_ROOT.'/source/plugin/codfrm_markdown/markdown.class.php';
+require_once DISCUZ_ROOT . '/source/plugin/codfrm_markdown/markdown.class.php';
 
 class table_custom_emoji extends discuz_table
 {
@@ -29,20 +29,23 @@ class table_custom_emoji extends discuz_table
 
     public function create($uid, $url)
     {
-        return C::t('#codfrm_markdown#custom_emoji')->insert(array(
-            'uid' => $uid,
-            'url' => $url,
-            'createtime' => time()
-        ));
+        return C::t('#codfrm_markdown#custom_emoji')->insert(
+            array(
+                'uid' => $uid,
+                'url' => $url,
+                'createtime' => time()
+            )
+        );
     }
 
-    // public function delete($uid, $url)
-    // {
-    //     return DB::delete($this->_table, [
-    //         'uid' => $uid,
-    //         'url' => $url
-    //     ]);
-    // }
+    public function deleteRecord($uid, $url)
+    {
+        return DB::delete(
+            $this->_table,
+            DB::field('uid', $uid) . ' AND ' . DB::field('url', $url)
+        );
+
+    }
 }
 
 // // require_once libfile('table/custom_emoji', 'plugin/codfrm_markdown');
@@ -64,10 +67,10 @@ class server
             echo json_encode(['code' => -1, 'data' => '请先登录']);
             return;
         }
-        // if (!config::getInstance()->enableEmoji()) {
-        //     echo json_encode(['code' => -1, 'data' => '功能未开启']);
-        //     return;
-        // }
+        if (!config::getInstance()->enableEmoji()) {
+            echo json_encode(['code' => -1, 'data' => '功能未开启']);
+            return;
+        }
 
         switch ($_GET['op']) {
             case 'recent':
@@ -91,8 +94,10 @@ class server
     public function recent()
     {
         global $_G;
-        $list = DB::fetch_all("SELECT * FROM " . DB::table('forum_attachment') . " WHERE uid=%d order by aid desc limit 30",
-            [$_G['uid']]);
+        $list = DB::fetch_all(
+            "SELECT * FROM " . DB::table('forum_attachment') . " WHERE uid=%d order by aid desc limit 30",
+            [$_G['uid']]
+        );
         $emoji = [];
         foreach ($list as $item) {
             $suffix = $item['tableid'];
@@ -128,7 +133,7 @@ class server
     public function del()
     {
         global $_G;
-        $this->custom->delete($_G['uid'], $_POST['url']);
+        $this->custom->deleteRecord($_G['uid'], $_POST['url']);
         return ['code' => 0, 'data' => 'ok'];
     }
 }
